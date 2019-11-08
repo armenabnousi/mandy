@@ -1,0 +1,7 @@
+output_filename: mandy_output.tsv
+chip_filenames: /home/abnousa/data/mumbach2017ng_GSE101498/MACS2_peaks/encode_GM_H3K27ac_replicated_peaks.bed, /home/abnousa/data/mumbach2017ng_GSE101498/MACS2_peaks/k562_H3K27ac_encode_replicated_peaks_narrowpeaks_ENCFF044JNJ.bed
+bedpe_dirs : /home/abnousa/data/mumbach2017ng_GSE101498/MAPS/GM_HiChIP_K3K27ac/MAPS_output/SRR5831489_current,/home/abnousa/data/mumbach2017ng_GSE101498/MAPS/GM_HiChIP_K3K27ac/MAPS_output/SRR5831490_current,/home/abnousa/data/mumbach2017ng_GSE101498/MAPS/K562_HiChIP_H3K27ac/MAPS_output/SRR5831491_current, /home/abnousa/data/mumbach2017ng_GSE101498/MAPS/K562_HiChIP_H3K27ac/MAPS_output/SRR5831492_current,/home/abnousa/data/mumbach2017ng_GSE101498/MAPS/K562_HiChIP_H3K27ac/MAPS_output/SRR5831493_current
+maps_peaks_filenames: /home/abnousa/data/mumbach2017ng_GSE101498/MAPS/GM_HiChIP_K3K27ac/MAPS_output/GM_HiChIP_H3K27ac_b1b2_current/GM_HiChIP_H3K27ac_b1b2.10k.2.peaks.bedpe, /home/abnousa/data/mumbach2017ng_GSE101498/MAPS/K562_HiChIP_H3K27ac/MAPS_output/K562_combined_r1r2r3_current/K562_combined_r1r2r3.10k.2.peaks.bedpe
+genome: hg #mm
+groups: "0,0,1,1,1"
+mandy_utils_path: /home/abnousa/software/diff_interactions/mandy/mandy_utils.R
