@@ -56,10 +56,10 @@ for (chrom in chromosomes) {
     bedpe_dir <- bedpe_dirs[replicate_number]
     
     #read counts and run regression
-    rep_counts <- process_replicate(bedpe_dir, chrom, rep_name)
+    rep_counts <- process_replicate(bedpe_dir, chrom, rep_name, chrom_testables)
     
     #subset to only testables
-    rep_counts <- merge(rep_counts, chrom_testables, by.x = c("chr", "bin1_mid", "bin2_mid"), by.y = c("chr1", "start1", "start2"))
+    #rep_counts <- merge(rep_counts, chrom_testables, by.x = c("chr", "bin1_mid", "bin2_mid"), by.y = c("chr1", "start1", "start2"))
     
     ##append the replica data to the data from previous replicates
     chrom_testables_counts <- merge(chrom_testables_counts, rep_counts, all.x = TRUE, by.x = c("chr1", "start1", "start2"), by.y = c("chr", "bin1_mid", "bin2_mid"))
