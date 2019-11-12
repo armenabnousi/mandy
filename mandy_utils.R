@@ -45,7 +45,7 @@ process_replicate <- function(bedpe_dir, chrom, rep_name, testables) {
                            data.frame(type = substr(filenames[2], nchar(filenames[2]) - 2, nchar(filenames[1])))))
   
   rep_reads$chr <- paste0("chr", chrom)
-  rep_reads <- merge(rep_reads, chrom_testables, by.x = c("chr", "bin1_mid", "bin2_mid"), by.y = c("chr1", "start1", "start2"))
+  rep_reads <- merge(rep_reads, testables, by.x = c("chr", "bin1_mid", "bin2_mid"), by.y = c("chr1", "start1", "start2"))
   rep_reads$expected <- 0
   rep_reads$pval <- 1
   ##for "and" and "xor" sets compute the regression and add the expected values to the dataframe
