@@ -11,7 +11,7 @@ parser <- ArgumentParser()
 parser$add_argument("-c", "--configfile", type="character", 
                     help="path to the YAML file for all parameters")
 args <- parser$parse_args()
-#inputs <- read_yaml("~/mandy.yaml")
+#inputs <- read_yaml("~/data/diff_interactions/simulated_data/bams/separated/mandy/config.yaml")
 
 inputs <- read_yaml(args$configfile)
 

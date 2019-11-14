@@ -34,36 +34,50 @@ compute_qnorm <- function (df, rep_names) {
   return(df)
 }
 
-process_replicate <- function(bedpe_dir, chrom, rep_name, testables) {
-  filenames <- system(paste0("ls ", bedpe_dir, "/reg_raw.chr", chrom, ".*| egrep and$\\|xor$"), intern = TRUE)
+process_replicate <- function(bedpe_dir, chrom, rep_name, testables, method = "mandy") {
+  if (method == "mandy") {
+    filename_ls_command <- paste0("ls ", bedpe_dir, "/reg_raw.chr", chrom, ".*| egrep and$\\|xor$")
+    select_columns <- c("bin1_mid", "bin2_mid", "logl", "loggc", "logm", "logShortCount", "count")
+    cols_to_return <- c('type', 'count', 'expected', 'pval', 'normalized', 'log2norm')
+    run_regression <- TRUE
+  } else if (method == "fithichip") {
+    filename_ls_command <- paste0("ls ", bedpe_dir, "/reg_raw.chr", chrom, ".*MAPS2_pospoisson")
+    select_columns <- c("bin1_mid", "bin2_mid", "count", "fdr")
+    cols_to_return <- c("count", "fdr")
+    run_regression <- FALSE
+  }
+  
+  filenames <- system(filename_ls_command, intern = TRUE)
   if (length(filenames) != 2) {
     stop("for each chromosome there should be two files with .and and .or ending")
   }
-  rep_reads <- rbind(cbind(fread(filenames[1], select = c("bin1_mid", "bin2_mid", "logl", "loggc", "logm", "logShortCount", "count")), 
+
+  rep_reads <- rbind(cbind(fread(filenames[1], select = select_columns), 
                            data.frame(type = substr(filenames[1], nchar(filenames[1]) - 2, nchar(filenames[1])))), 
-                     cbind(fread(filenames[2], select = c("bin1_mid", "bin2_mid", "logl", "loggc", "logm", "logShortCount", "count")),
+                     cbind(fread(filenames[2], select = select_columns),
                            data.frame(type = substr(filenames[2], nchar(filenames[2]) - 2, nchar(filenames[1])))))
   
   rep_reads$chr <- paste0("chr", chrom)
   rep_reads <- merge(rep_reads, testables, by.x = c("chr", "bin1_mid", "bin2_mid"), by.y = c("chr1", "start1", "start2"))
-  rep_reads$expected <- 0
-  rep_reads$pval <- 1
-  ##for "and" and "xor" sets compute the regression and add the expected values to the dataframe
-  for (type in unique(rep_reads$type)) {
-    rep_reads_type <- rep_reads[rep_reads$type == type]
-    fit <- vglm(count ~ logl + loggc + logm + logShortCount, family = pospoisson(), data = rep_reads_type)
-    expected <- fitted(fit)
-    pvals <- ppois(rep_reads_type$count, expected, lower.tail = FALSE, log.p = FALSE) / ppois(0, expected, lower.tail = FALSE, log.p = FALSE)
-    rep_reads[rep_reads$type == type, "expected"] <- expected
-    rep_reads[rep_reads$type == type, "pval"]$pval <- pvals
+  if (run_regression) {
+    rep_reads$expected <- 0
+    rep_reads$pval <- 1
+    ##for "and" and "xor" sets compute the regression and add the expected values to the dataframe
+    for (type in unique(rep_reads$type)) {
+      rep_reads_type <- rep_reads[rep_reads$type == type]
+      fit <- vglm(count ~ logl + loggc + logm + logShortCount, family = pospoisson(), data = rep_reads_type)
+      expected <- fitted(fit)
+      pvals <- ppois(rep_reads_type$count, expected, lower.tail = FALSE, log.p = FALSE) / ppois(0, expected, lower.tail = FALSE, log.p = FALSE)
+      rep_reads[rep_reads$type == type, "expected"] <- expected
+      rep_reads[rep_reads$type == type, "pval"]$pval <- pvals
+    }
+    rep_reads$normalized <- rep_reads$count / rep_reads$expected
+    rep_reads$log2norm <- log2(rep_reads$normalized + 1)
   }
-  rep_reads$normalized <- rep_reads$count / rep_reads$expected
-  rep_reads$log2norm <- log2(rep_reads$normalized + 1)
   
   #rename the columns by appending replicate name
-  cols_to_rename <- c('type', 'count', 'expected', 'pval', 'normalized', 'log2norm')
-  rep_reads <- select(rep_reads, c("chr", "bin1_mid", "bin2_mid", cols_to_rename))
-  for (col in cols_to_rename) {
+  rep_reads <- select(rep_reads, c("chr", "bin1_mid", "bin2_mid", cols_to_return))
+  for (col in cols_to_return) {
     colnames(rep_reads)[colnames(rep_reads) == col] <- paste0(rep_name, "_", col)
   }
   
